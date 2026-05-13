@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<template id="books_list_template" name="Danh sách sách">
+		<t t-call="website.layout">
+			<div class="container mt-4 mb-4">
+				<h2>Danh mục Sách Thư Viện</h2>
+				<div class="row">
+					<t t-foreach="books" t-as="book">
+						<div class="col-md-4 mb-4">
+							<div class="card h-100">
+								<div class="card-body">
+									<h5 class="card-title">
+										<t t-esc="book.name"/>
+									</h5>
+									<h6 class="card-subtitle mb-2 text-muted">
+										Tác giả: <t t-esc="book.author"/>
+									</h6>
+									<p class="card-text">
+										Còn lại: <t t-esc="book.quantity"/> cuốn
+									</p>
+									<a t-attf-href="/library/book/#{book.id}" class="btn btn-primary">Xem chi tiết</a>
+								</div>
+							</div>
+						</div>
+					</t>
+				</div>
+			</div>
+		</t>
+	</template>
+
+	<template id="book_detail_template" name="Chi tiết sách">
+		<t t-call="website.layout">
+			<div class="container mt-4 mb-4">
+				<h2>
+					<t t-esc="book.name"/>
+				</h2>
+				<hr/>
+				<p>
+					<strong>Tác giả:</strong>
+					<t t-esc="book.author"/>
+				</p>
+				<p>
+					<strong>ISBN:</strong>
+					<t t-esc="book.isbn"/>
+				</p>
+				<p>
+					<strong>Mô tả:</strong>
+					<t t-esc="book.description"/>
+				</p>
+				<p>
+					<strong>Số lượng hiện có:</strong>
+					<t t-esc="book.quantity"/>
+				</p>
+
+				<t t-if="book.quantity > 0">
+					<a t-attf-href="/library/borrow/#{book.id}" class="btn btn-success mt-3">Đăng ký mượn</a>
+				</t>
+				<t t-else="">
+					<button class="btn btn-danger mt-3" disabled="1">Sách đã hết</button>
+				</t>
+			</div>
+		</t>
+	</template>
+
+	<template id="borrow_form_template" name="Đăng ký mượn sách">
+		<t t-call="website.layout">
+			<div class="container mt-4 mb-4">
+				<h3>
+					Đăng ký mượn sách: <t t-esc="book.name"/>
+				</h3>
+
+				<div t-if="error" class="alert alert-danger" role="alert">
+					<t t-esc="error"/>
+				</div>
+
+				<form action="/library/borrow/submit" method="POST" class="mt-4" style="max-width: 500px;">
+					<input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+					<input type="hidden" name="book_id" t-att-value="book.id"/>
+
+					<div class="form-group mb-3">
+						<label>
+							Họ và tên <span class="text-danger">*</span>
+						</label>
+						<input type="text" name="name" class="form-control" t-att-value="post_data.get('name', '')"/>
+					</div>
+
+					<div class="form-group mb-3">
+						<label>
+							Email <span class="text-danger">*</span>
+						</label>
+						<input type="email" name="email" class="form-control" t-att-value="post_data.get('email', '')"/>
+					</div>
+
+					<div class="form-group mb-4">
+						<label>Số điện thoại</label>
+						<input type="text" name="phone" class="form-control" t-att-value="post_data.get('phone', '')"/>
+					</div>
+
+					<button type="submit" class="btn btn-primary">Xác nhận mượn</button>
+					<a href="/library/books" class="btn btn-secondary">Hủy bỏ</a>
+				</form>
+			</div>
+		</t>
+	</template>
+
+	<template id="borrow_thank_you_template" name="Cảm ơn">
+		<t t-call="website.layout">
+			<div class="container mt-5 mb-5 text-center">
+				<h1 class="text-success">Đăng ký thành công!</h1>
+				<p>Cảm ơn bạn. Yêu cầu mượn sách của bạn đã được ghi nhận.</p>
+				<p t-if="request_id">
+					Mã yêu cầu của bạn là: <strong>
+						<t t-esc="request_id"/>
+					</strong>
+				</p>
+				<a href="/library/books" class="btn btn-primary mt-3">Quay lại danh sách</a>
+			</div>
+		</t>
+	</template>
+</odoo>
